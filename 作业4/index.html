@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>弹幕墙</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .frame {
+            margin-top: 10px;
+            margin-left: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sender {
+            height: 50px;
+            margin-left: 10px;
+            margin-top: 10px;
+        }
+
+        input {
+            outline-style: none;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 13px 14px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: "Microsoft soft";
+            width: 70%;
+        }
+
+        input:focus {
+            border-color: #66afe9;
+            outline: 0;
+            -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(100, 175, 233, .6);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6)
+        }
+
+        .senderBtn {
+            margin-left: 10px;
+            line-height: 48px;
+            border-radius: 3px;
+            display: inline-block;
+            color: white;
+            height: 48px;
+            width: 12%;
+            text-align: center;
+            font-size: larger;
+            background-color: #00A1D6;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main" class="frame"></div>
+    <div id="send" class="sender">
+        <input maxlength="100" id="inputText" type="text" placeholder="准备发送弹幕~" />
+        <div id="Btn1" class="senderBtn">发送</div>
+        <div id="Btn2" class="senderBtn">清屏</div>
+    </div>
+    <script type="text/javascript">
+        var WIN_WIDTH = 0;
+        var WIN_HEIGHT = 0;
+        var DANMU_LIST = [];
+        var SEQ = 1;
+
+        function DanMu(id, speed) {
+            return { "id": id, "speed": speed };
+        }
+
+        function getRandom(start, end, fixed = 0) {
+            let differ = end - start;
+            let random = Math.random();
+            return (start + differ * random).toFixed(fixed);
+        }
+
+        function addDanmu(text) {
+            let r = getRandom(0, 255);
+            let g = getRandom(0, 255);
+            let b = getRandom(0, 255);
+            let speed = getRandom(4, 8);
+            let size = getRandom(10, 50);
+            let top = getRandom(0, WIN_HEIGHT - 140);
+            let left = parseInt(getRandom(600, 3000)) + parseInt(WIN_WIDTH);
+            var danmu = document.createElement("div");
+            danmu.style.position = "absolute";
+            danmu.style.left = left + "px";
+            danmu.style.top = top + "px";
+            danmu.style.fontSize = size + "px";
+            danmu.style.color = "rgb(" + r + ", " + g + ", " + b + ")";
+            danmu.style.whiteSpace = "nowrap"
+            danmu.id = "danmu_" + SEQ++;
+            document.getElementById("main").appendChild(danmu);
+            document.getElementById(danmu.id).innerText = text;
+            var obj = { "id": danmu.id, "speed": speed, "length": -(5000 + WIN_WIDTH) };
+            console.log(obj.length, danmu.fontSize, WIN_WIDTH);
+            DANMU_LIST.push(obj);
+        }
+        function deleteDanmu(id) {
+            var danmu = document.getElementById(id);
+            console.log("delete" + danmu);
+            if (danmu != null) {
+                danmu.parentNode.removeChild(danmu);
+            }
+        }
+
+        function sendDanmu() {
+            var text = document.getElementById("inputText").value;
+            document.getElementById("inputText").value = "";
+            for (var i = 0; i < 10; i++) {
+                addDanmu(text);
+            }
+        }
+
+        function move(id, speed) {
+            speed = parseInt(speed);
+            var now = parseInt(document.getElementById(id).style.left);
+            document.getElementById(id).style.left = now - speed + "px";
+        }
+
+
+        var int = self.setInterval("start()", 10);
+        function start() {
+            for (var i = DANMU_LIST.length - 1; i >= 0; i--) {
+                move(DANMU_LIST[i].id, DANMU_LIST[i].speed);
+                if (parseInt(document.getElementById(DANMU_LIST[i].id).style.left) < DANMU_LIST[i].length) {
+                    deleteDanmu(DANMU_LIST[i].id);
+                    DANMU_LIST.splice(i, 1);
+                }
+            }
+
+        }
+
+        function clearDanmu() {
+            DANMU_LIST = [];
+            document.getElementById("main").innerText = "";
+        }
+
+        function initWindows() {
+            WIN_WIDTH = document.documentElement.clientWidth;
+            WIN_HEIGHT = document.documentElement.clientHeight;
+            document.getElementById("main").style.height = (WIN_HEIGHT - 80) + "px";
+            document.getElementById("main").style.width = (WIN_WIDTH - 20) + "px";
+            document.getElementById("send").style.width = (WIN_WIDTH - 20) + "px";
+        }
+        window.onload = function () {
+            initWindows();
+            document.getElementById("Btn1").addEventListener("click", sendDanmu);
+            document.getElementById("Btn2").addEventListener("click", clearDanmu);
+            for (var i = 0; i < 25; i++) {
+                addDanmu("666！！！");
+            }
+            for (var i = 0; i < 15; i++) {
+                addDanmu("牛！！！");
+            }
+            for (var i = 0; i < 5; i++) {
+                addDanmu("冲！！！");
+            }
+        }
+        window.onresize = function () {
+            initWindows();
+        } 
+    </script>
+</body>
+
+</html>
